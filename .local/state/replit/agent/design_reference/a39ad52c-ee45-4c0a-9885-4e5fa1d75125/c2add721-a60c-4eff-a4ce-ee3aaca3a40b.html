@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Management System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        'inter': ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        'primary': '#3B82F6',
+                        'primary-dark': '#2563EB',
+                        'secondary': '#6B7280',
+                        'success': '#10B981',
+                        'error': '#EF4444',
+                        'warning': '#F59E0B',
+                    }
+                }
+            }
+        };
+    </script>
+</head>
+<body class="font-inter bg-gray-50 min-h-screen">
+    <!-- Login Page -->
+    <!-- @COMPONENT: LoginPage [showLogin state control] -->
+    <div id="loginPage" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4 sm:px-6 lg:px-8">
+        <div class="max-w-md w-full space-y-8">
+            <!-- Logo/Header -->
+            <div class="text-center">
+                <div class="mx-auto h-16 w-16 bg-primary rounded-full flex items-center justify-center mb-4">
+                    <i class="fas fa-envelope text-white text-2xl"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-gray-900">Email Management System</h2>
+                <p class="mt-2 text-sm text-gray-600">Sign in to your account</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form class="mt-8 space-y-6 bg-white p-8 rounded-xl shadow-lg" data-event="submit:handleLogin">
+                <!-- @STATE: email:string = '', password:string = '', isLoading:boolean = false -->
+                <div class="space-y-4">
+                    <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email address</label>
+                        <div class="relative">
+                            <input 
+                                id="email" 
+                                name="email" 
+                                type="email" 
+                                required 
+                                class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                                placeholder="Enter your email"
+                                data-bind="loginForm.email"
+                                data-mock="true"
+                            />
+                            <i class="fas fa-envelope absolute left-3 top-3.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                        <div class="relative">
+                            <input 
+                                id="password" 
+                                name="password" 
+                                type="password" 
+                                required 
+                                class="appearance-none relative block w-full px-3 py-3 pl-10 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200"
+                                placeholder="Enter your password"
+                                data-bind="loginForm.password"
+                                data-mock="true"
+                            />
+                            <i class="fas fa-lock absolute left-3 top-3.5 text-gray-400"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center">
+                        <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 text-primary focus:ring-primary border-gray-300 rounded">
+                        <label for="remember-me" class="ml-2 block text-sm text-gray-900">Remember me</label>
+                    </div>
+                    <div class="text-sm">
+                        <a href="#" class="font-medium text-primary hover:text-primary-dark">Forgot password?</a>
+                    </div>
+                </div>
+
+                <button 
+                    type="submit" 
+                    class="group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200"
+                    data-implementation="Should authenticate with Firebase Auth"
+                >
+                    <span class="absolute left-0 inset-y-0 flex items-center pl-3">
+                        <i class="fas fa-sign-in-alt text-white"></i>
+                    </span>
+                    Sign in
+                </button>
+            </form>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: LoginPage -->
+
+    <!-- Dashboard -->
+    <!-- @COMPONENT: Dashboard [user session, email data] -->
+    <div id="dashboardPage" class="hidden min-h-screen bg-gray-50">
+        <!-- Navigation Bar -->
+        <!-- @COMPONENT: NavigationBar [user data, logout handler] -->
+        <nav class="bg-white shadow-sm border-b border-gray-200">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 flex items-center">
+                            <div class="h-8 w-8 bg-primary rounded-lg flex items-center justify-center">
+                                <i class="fas fa-envelope text-white text-sm"></i>
+                            </div>
+                            <span class="ml-2 text-xl font-semibold text-gray-900">Email Management</span>
+                        </div>
+                        <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+                            <a href="#" class="border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium">
+                                <i class="fas fa-chart-line mr-2"></i>
+                                Dashboard
+                            </a>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="flex items-center space-x-2">
+                            <div class="h-8 w-8 bg-gray-300 rounded-full flex items-center justify-center">
+                                <i class="fas fa-user text-gray-600 text-sm"></i>
+                            </div>
+                            <span class="hidden sm:block text-sm font-medium text-gray-700" data-bind="user.email" data-mock="true">admin@example.com</span>
+                        </div>
+                        <button 
+                            class="bg-gray-100 hover:bg-gray-200 text-gray-700 px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200"
+                            data-event="click:handleLogout"
+                            data-implementation="Should sign out from Firebase Auth"
+                        >
+                            <i class="fas fa-sign-out-alt mr-1"></i>
+                            Logout
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <!-- @END_COMPONENT: NavigationBar -->
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+            <div class="px-4 py-6 sm:px-0">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900">Email Campaign Dashboard</h1>
+                    <p class="mt-2 text-gray-600">Upload and send HTML emails to all registered users</p>
+                </div>
+
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="h-10 w-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-users text-primary"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <dt class="text-sm font-medium text-gray-500 truncate">Total Recipients</dt>
+                                <dd class="text-2xl font-semibold text-gray-900" data-bind="userStats.totalUsers" data-mock="true">1,247</dd>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="h-10 w-10 bg-green-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-paper-plane text-success"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <dt class="text-sm font-medium text-gray-500 truncate">Emails Sent Today</dt>
+                                <dd class="text-2xl font-semibold text-gray-900" data-bind="emailStats.sentToday" data-mock="true">342</dd>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200">
+                        <div class="flex items-center">
+                            <div class="flex-shrink-0">
+                                <div class="h-10 w-10 bg-yellow-100 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-clock text-warning"></i>
+                                </div>
+                            </div>
+                            <div class="ml-4">
+                                <dt class="text-sm font-medium text-gray-500 truncate">Success Rate</dt>
+                                <dd class="text-2xl font-semibold text-gray-900" data-bind="emailStats.successRate" data-mock="true">98.5%</dd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Upload and Preview Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Upload Section -->
+                    <!-- @COMPONENT: EmailUpload [file upload handler, validation] -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-upload mr-2 text-primary"></i>
+                                Upload Email Template
+                            </h2>
+                            
+                            <!-- File Upload Area -->
+                            <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-primary transition-colors duration-200" 
+                                 data-implementation="Should handle HTML file upload with validation">
+                                <!-- @STATE: uploadedFile:File | null = null, isDragOver:boolean = false -->
+                                <div class="mx-auto h-12 w-12 text-gray-400 mb-4">
+                                    <i class="fas fa-cloud-upload-alt text-3xl"></i>
+                                </div>
+                                <div class="text-sm text-gray-600">
+                                    <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-primary hover:text-primary-dark">
+                                        <span>Upload HTML file</span>
+                                        <input id="file-upload" name="file-upload" type="file" accept=".html" class="sr-only" 
+                                               data-event="change:handleFileUpload">
+                                    </label>
+                                    <p class="pl-1">or drag and drop</p>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">HTML files up to 10MB</p>
+                            </div>
+
+                            <!-- Uploaded File Info -->
+                            <div id="fileInfo" class="hidden mt-4 p-4 bg-green-50 rounded-lg border border-green-200">
+                                <div class="flex items-center">
+                                    <i class="fas fa-file-code text-green-500 mr-3"></i>
+                                    <div class="flex-1">
+                                        <p class="text-sm font-medium text-green-900" data-bind="uploadedFile.name" data-mock="true">email-template.html</p>
+                                        <p class="text-xs text-green-700" data-bind="uploadedFile.size" data-mock="true">12.5 KB</p>
+                                    </div>
+                                    <button class="text-green-700 hover:text-green-900">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Send Button -->
+                            <button 
+                                class="w-full mt-6 bg-primary hover:bg-primary-dark text-white font-medium py-3 px-4 rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                data-event="click:handleSendEmail"
+                                data-implementation="Should send email to all users in Firestore via Resend API"
+                            >
+                                <i class="fas fa-paper-plane mr-2"></i>
+                                Send to All Recipients
+                            </button>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: EmailUpload -->
+
+                    <!-- Preview Section -->
+                    <!-- @COMPONENT: EmailPreview [HTML content rendering] -->
+                    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                        <div class="p-6">
+                            <h2 class="text-xl font-semibold text-gray-900 mb-4">
+                                <i class="fas fa-eye mr-2 text-primary"></i>
+                                Email Preview
+                            </h2>
+                            
+                            <!-- Preview Frame -->
+                            <div class="border border-gray-200 rounded-lg overflow-hidden">
+                                <!-- @STATE: previewHTML:string = '' -->
+                                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Preview</span>
+                                    <div class="flex space-x-2">
+                                        <button class="text-xs bg-gray-200 hover:bg-gray-300 px-2 py-1 rounded">Desktop</button>
+                                        <button class="text-xs bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded">Mobile</button>
+                                    </div>
+                                </div>
+                                <div class="h-96 overflow-auto bg-white" data-implementation="Should render uploaded HTML content">
+                                    <!-- Mock email preview content -->
+                                    <div class="p-4 text-center text-gray-500" data-mock="true">
+                                        <i class="fas fa-envelope-open-text text-4xl mb-4 text-gray-300"></i>
+                                        <p>Upload an HTML file to see preview</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- @END_COMPONENT: EmailPreview -->
+                </div>
+
+                <!-- Email Logs Section -->
+                <!-- @COMPONENT: EmailLogs [email history data, pagination] -->
+                <div class="bg-white rounded-xl shadow-sm border border-gray-200">
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-semibold text-gray-900">
+                                <i class="fas fa-history mr-2 text-primary"></i>
+                                Email Logs
+                            </h2>
+                            <div class="flex space-x-2">
+                                <select class="text-sm border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-primary">
+                                    <option>All Status</option>
+                                    <option>Sent</option>
+                                    <option>Failed</option>
+                                    <option>Pending</option>
+                                </select>
+                                <button class="text-sm bg-gray-100 hover:bg-gray-200 px-3 py-2 rounded-lg">
+                                    <i class="fas fa-download mr-1"></i>
+                                    Export
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Table -->
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Recipient</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Subject</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sent Date</th>
+                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    <!-- @MAP: emailLogs.map(log => ( -->
+                                    <tr class="hover:bg-gray-50" data-mock="true">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-500 text-xs"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900" data-bind="log.recipientName">John Doe</div>
+                                                    <div class="text-sm text-gray-500" data-bind="log.recipientEmail">john@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900" data-bind="log.subject">Weekly Newsletter</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                                                <i class="fas fa-check-circle mr-1"></i>
+                                                Sent
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" data-bind="log.sentDate">2024-01-15 10:30 AM</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button class="text-primary hover:text-primary-dark mr-3">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-gray-600">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50" data-mock="true">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-500 text-xs"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">Jane Smith</div>
+                                                    <div class="text-sm text-gray-500">jane@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Product Updates</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                                                <i class="fas fa-exclamation-circle mr-1"></i>
+                                                Failed
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-15 10:28 AM</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button class="text-primary hover:text-primary-dark mr-3">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-gray-600">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50" data-mock="true">
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <div class="flex items-center">
+                                                <div class="h-8 w-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                                    <i class="fas fa-user text-gray-500 text-xs"></i>
+                                                </div>
+                                                <div class="ml-3">
+                                                    <div class="text-sm font-medium text-gray-900">Mike Johnson</div>
+                                                    <div class="text-sm text-gray-500">mike@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Monthly Report</td>
+                                        <td class="px-6 py-4 whitespace-nowrap">
+                                            <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">
+                                                <i class="fas fa-clock mr-1"></i>
+                                                Pending
+                                            </span>
+                                        </td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2024-01-15 10:25 AM</td>
+                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <button class="text-primary hover:text-primary-dark mr-3">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button class="text-gray-400 hover:text-gray-600">
+                                                <i class="fas fa-redo"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <!-- @END_MAP )) -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="flex items-center justify-between mt-6">
+                            <div class="text-sm text-gray-700">
+                                Showing <span class="font-medium">1</span> to <span class="font-medium">10</span> of <span class="font-medium">97</span> results
+                            </div>
+                            <div class="flex space-x-2">
+                                <button class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Previous</button>
+                                <button class="px-3 py-2 text-sm bg-primary text-white rounded-lg">1</button>
+                                <button class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">2</button>
+                                <button class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">3</button>
+                                <button class="px-3 py-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50">Next</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- @END_COMPONENT: EmailLogs -->
+            </div>
+        </main>
+    </div>
+    <!-- @END_COMPONENT: Dashboard -->
+
+    <!-- Toast Notifications -->
+    <!-- @COMPONENT: ToastNotifications [notification queue, auto-dismiss] -->
+    <div id="toastContainer" class="fixed top-4 right-4 z-50 space-y-2">
+        <!-- Success Toast -->
+        <div class="hidden bg-white border border-green-200 rounded-lg shadow-lg p-4 max-w-md" id="successToast" data-mock="true">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-check-circle text-success text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Email sent successfully!</p>
+                    <p class="text-sm text-gray-500">All recipients will receive the email shortly.</p>
+                </div>
+                <button class="ml-auto text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Error Toast -->
+        <div class="hidden bg-white border border-red-200 rounded-lg shadow-lg p-4 max-w-md" id="errorToast" data-mock="true">
+            <div class="flex items-start">
+                <div class="flex-shrink-0">
+                    <i class="fas fa-exclamation-circle text-error text-xl"></i>
+                </div>
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-gray-900">Failed to send email</p>
+                    <p class="text-sm text-gray-500">Please check your API configuration and try again.</p>
+                </div>
+                <button class="ml-auto text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: ToastNotifications -->
+
+    <!-- Loading Overlay -->
+    <!-- @COMPONENT: LoadingOverlay [loading state] -->
+    <div id="loadingOverlay" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-lg p-8 max-w-sm mx-4">
+            <div class="text-center">
+                <div class="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Sending Emails</h3>
+                <p class="text-sm text-gray-600">Please wait while we send emails to all recipients...</p>
+                <div class="mt-4">
+                    <div class="bg-gray-200 rounded-full h-2">
+                        <div class="bg-primary h-2 rounded-full transition-all duration-300" style="width: 45%" data-bind="sendProgress"></div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-2" data-bind="progressText" data-mock="true">Sending to 342 of 1,247 recipients...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- @END_COMPONENT: LoadingOverlay -->
+
+    <script>
+        // TODO: Implement Firebase Authentication
+        // TODO: Implement Firestore integration for user management
+        // TODO: Implement Resend.com API integration for email sending
+        // TODO: Implement file upload and HTML validation
+        // TODO: Implement real-time preview rendering
+        // TODO: Implement bulk email processing with status tracking
+
+        (function() {
+            // Demo functionality for switching between login and dashboard
+            const loginPage = document.getElementById('loginPage');
+            const dashboardPage = document.getElementById('dashboardPage');
+            
+            // Demo login simulation
+            const loginForm = loginPage.querySelector('form');
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                // Simulate login process
+                setTimeout(() => {
+                    loginPage.classList.add('hidden');
+                    dashboardPage.classList.remove('hidden');
+                }, 1000);
+            });
+
+            // Demo logout functionality
+            const logoutBtn = dashboardPage.querySelector('[data-event="click:handleLogout"]');
+            logoutBtn.addEventListener('click', function() {
+                dashboardPage.classList.add('hidden');
+                loginPage.classList.remove('hidden');
+            });
+
+            // Demo file upload
+            const fileInput = document.getElementById('file-upload');
+            const fileInfo = document.getElementById('fileInfo');
+            
+            fileInput.addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    fileInfo.classList.remove('hidden');
+                }
+            });
+
+            // Demo send email with loading
+            const sendBtn = dashboardPage.querySelector('[data-event="click:handleSendEmail"]');
+            const loadingOverlay = document.getElementById('loadingOverlay');
+            const successToast = document.getElementById('successToast');
+            
+            sendBtn.addEventListener('click', function() {
+                loadingOverlay.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    loadingOverlay.classList.add('hidden');
+                    successToast.classList.remove('hidden');
+                    
+                    setTimeout(() => {
+                        successToast.classList.add('hidden');
+                    }, 5000);
+                }, 3000);
+            });
+
+            // Auto-hide toasts
+            document.querySelectorAll('#toastContainer [id$="Toast"]').forEach(toast => {
+                const closeBtn = toast.querySelector('button');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', () => {
+                        toast.classList.add('hidden');
+                    });
+                }
+            });
+        })();
+    </script>
+</body>
+</html>
