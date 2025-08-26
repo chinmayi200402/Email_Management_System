@@ -1,17 +1,19 @@
 import { useState } from "react";
 import { signInWithEmailAndPassword, auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, LogIn } from "lucide-react";
+import { Mail, Lock, LogIn, UserPlus } from "lucide-react";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -22,15 +24,24 @@ export default function Login() {
       if (!auth) {
         throw new Error("Authentication service not available. Please check Firebase configuration.");
       }
-      await signInWithEmailAndPassword(auth, email, password);
-      toast({
-        title: "Success",
-        description: "Successfully signed in!",
-      });
+      
+      if (isSignUp) {
+        await createUserWithEmailAndPassword(auth, email, password);
+        toast({
+          title: "Success",
+          description: "Account created successfully!",
+        });
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        toast({
+          title: "Success", 
+          description: "Successfully signed in!",
+        });
+      }
     } catch (error: any) {
       toast({
         title: "Error",
-        description: error.message || "Failed to sign in",
+        description: error.message || `Failed to ${isSignUp ? 'create account' : 'sign in'}`,
         variant: "destructive",
       });
     } finally {
@@ -46,7 +57,7 @@ export default function Login() {
             <Mail className="text-white text-2xl" />
           </div>
           <h2 className="text-3xl font-bold text-gray-900">Email Management System</h2>
-          <p className="mt-2 text-sm text-gray-600">Sign in to your account</p>
+          <p className="mt-2 text-sm text-gray-600">{isSignUp ? 'Create your account' : 'Sign in to your account'}</p>
         </div>
 
         <Card className="bg-white shadow-lg">
@@ -114,9 +125,20 @@ export default function Login() {
                 disabled={isLoading}
                 data-testid="button-login"
               >
-                <LogIn className="mr-2 h-4 w-4" />
-                {isLoading ? "Signing in..." : "Sign in"}
+                {isSignUp ? <UserPlus className="mr-2 h-4 w-4" /> : <LogIn className="mr-2 h-4 w-4" />}
+                {isLoading ? (isSignUp ? "Creating account..." : "Signing in...") : (isSignUp ? "Create Account" : "Sign in")}
               </Button>
+              
+              <div className="text-center">
+                <button
+                  type="button"
+                  onClick={() => setIsSignUp(!isSignUp)}
+                  className="text-sm text-primary hover:text-primary/80 font-medium"
+                  data-testid="button-toggle-signup"
+                >
+                  {isSignUp ? "Already have an account? Sign in" : "Don't have an account? Create one"}
+                </button>
+              </div>
             </form>
           </CardContent>
         </Card>
