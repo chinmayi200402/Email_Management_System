@@ -19,11 +19,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let users = [];
       
       try {
-        const usersSnapshot = await firestore.collection("users").get();
-        users = usersSnapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
+        if (firestore) {
+          const usersSnapshot = await firestore.collection("users").get();
+          users = usersSnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+        } else {
+          users = await storage.getAllUsers();
+        }
       } catch (error) {
         console.log("Firestore not available, using memory storage");
         users = await storage.getAllUsers();
@@ -74,12 +78,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let users = [];
       
       try {
-        const usersSnapshot = await firestore.collection("users").get();
-        users = usersSnapshot.docs.map(doc => ({
-          id: doc.id,
-          name: doc.data().name,
-          email: doc.data().email,
-        }));
+        if (firestore) {
+          const usersSnapshot = await firestore.collection("users").get();
+          users = usersSnapshot.docs.map(doc => ({
+            id: doc.id,
+            name: doc.data().name,
+            email: doc.data().email,
+          }));
+        } else {
+          const storageUsers = await storage.getAllUsers();
+          users = storageUsers.map(user => ({
+            id: user.id,
+            name: user.name,
+            email: user.email,
+          }));
+        }
       } catch (error) {
         console.log("Firestore not available, using memory storage");
         const storageUsers = await storage.getAllUsers();

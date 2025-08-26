@@ -57,6 +57,7 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id,
       createdAt: new Date(),
+      firebaseUid: insertUser.firebaseUid || null,
     };
     this.users.set(id, user);
     return user;
@@ -72,6 +73,8 @@ export class MemStorage implements IStorage {
       ...insertLog,
       id,
       sentAt: new Date(),
+      errorMessage: insertLog.errorMessage || null,
+      resendId: insertLog.resendId || null,
     };
     this.emailLogs.set(id, log);
     return log;

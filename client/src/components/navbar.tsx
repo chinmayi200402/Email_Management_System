@@ -8,6 +8,10 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     try {
+      if (!auth) {
+        console.warn("Authentication service not available");
+        return;
+      }
       await signOut(auth);
     } catch (error) {
       console.error("Logout error:", error);

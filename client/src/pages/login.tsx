@@ -19,6 +19,9 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      if (!auth) {
+        throw new Error("Authentication service not available. Please check Firebase configuration.");
+      }
       await signInWithEmailAndPassword(auth, email, password);
       toast({
         title: "Success",

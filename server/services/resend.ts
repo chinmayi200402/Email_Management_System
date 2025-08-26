@@ -1,6 +1,12 @@
 import { Resend } from "resend";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+let resend: Resend | null = null;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+} else {
+  console.warn('Resend not initialized - missing RESEND_API_KEY environment variable');
+}
 
 export interface SendEmailOptions {
   to: string;
@@ -11,6 +17,11 @@ export interface SendEmailOptions {
 
 export async function sendEmail(options: SendEmailOptions) {
   const { to, subject, html, from = "noreply@yourdomain.com" } = options;
+
+  if (!resend) {
+    console.warn(`Email sending disabled - would have sent to ${to} with subject "${subject}"`);
+    return { success: false, id: `mock_${Date.now()}` };
+  }
 
   try {
     const { data, error } = await resend.emails.send({
