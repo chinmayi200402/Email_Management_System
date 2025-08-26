@@ -1,10 +1,12 @@
 import { signOut, auth } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
-import { Mail, BarChart3, LogOut, User } from "lucide-react";
+import { Link, useLocation } from "wouter";
+import { Mail, BarChart3, LogOut, User, Settings } from "lucide-react";
 
 export default function Navbar() {
   const { user } = useAuth();
+  const [location] = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -30,14 +32,18 @@ export default function Navbar() {
               <span className="ml-2 text-xl font-semibold text-gray-900">Email Management</span>
             </div>
             <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-              <a
-                href="#"
-                className="border-primary text-gray-900 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                data-testid="link-dashboard"
-              >
-                <BarChart3 className="mr-2 h-4 w-4" />
-                Dashboard
-              </a>
+              <Link href="/">
+                <a className={`${location === '/' ? 'border-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`} data-testid="link-dashboard">
+                  <BarChart3 className="mr-2 h-4 w-4" />
+                  Dashboard
+                </a>
+              </Link>
+              <Link href="/profile">
+                <a className={`${location === '/profile' ? 'border-primary text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'} inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium`} data-testid="link-profile">
+                  <Settings className="mr-2 h-4 w-4" />
+                  Profile
+                </a>
+              </Link>
             </div>
           </div>
           <div className="flex items-center space-x-4">
