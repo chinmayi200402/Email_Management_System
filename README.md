@@ -196,5 +196,7 @@ The application is designed to work seamlessly on Replit with automatic deployme
 MIT License - see LICENSE file for details
 
 ## Support
-
+HEAD
 For issues and questions, please open a GitHub issue or contact support.
+For issues and questions, please open a GitHub issue or contact support.
+724d8adf73f42c44fd10290ec82c9645e2b29399
